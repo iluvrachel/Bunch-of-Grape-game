@@ -13,6 +13,8 @@ public class SelectionManager : MonoBehaviour
     public Material water_tile;
 
     List<Vector3Int>  neighbours = new List<Vector3Int>();
+    List<GameObject> forest_hex = new List<GameObject>();
+    List<GameObject> water_hex = new List<GameObject>();
 
     private void Awake()
     {
@@ -40,14 +42,39 @@ public class SelectionManager : MonoBehaviour
                 hex_grid.Get_Tile_At(neightbour).Disable_Highlight();
             }
 
+            if (selected_hex.hex_type == Hex.HexType.Default)
+            {
+                Replace_Hex(result);
+            }
+            // 需要在这里把所有同类hex都做一次bfs
+            List<Vector3Int> all_cords = new List<Vector3Int>(); 
 
-            // neighbours = hex_grid.Get_Neighbours_For(selected_hex.hex_coords);
+            if (GameManager.cur_turn % 2 == 1)
+            {
+                foreach (GameObject same_type_hex in forest_hex)
+                {
+                    all_cords.Add(same_type_hex.GetComponent<Hex>().hex_coords);
+                }
+            }
+            else
+            {
+                foreach (GameObject same_type_hex in water_hex)
+                {
+                    all_cords.Add(same_type_hex.GetComponent<Hex>().hex_coords);
+                }
+            }
 
-            // 需要在这里把所有同类hex都做一次bfs todo
+            BFSResult bfs_result = new BFSResult{};
+            // neighbours = new List<Vector3Int>(bfs_result.Get_Range_Positions());
+            neighbours = new List<Vector3Int>();
+            foreach (Vector3Int coords in all_cords)
+            {
+                bfs_result = GraphSearch.BFS_Get_Range(hex_grid, coords, 10);
+                List<Vector3Int> temp = new List<Vector3Int>(bfs_result.Get_Range_Positions());
+                
+                neighbours.AddRange(temp);
+            }
             
-            BFSResult bfs_result = GraphSearch.BFS_Get_Range(hex_grid, selected_hex.hex_coords,10);
-            neighbours = new List<Vector3Int>(bfs_result.Get_Range_Positions());
-
             // 在这里判断一下hex类型，排除一些不要闪烁材质就可以
             foreach (Vector3Int neightbour in neighbours)
             {
@@ -60,14 +87,11 @@ public class SelectionManager : MonoBehaviour
             }
             selected_hex.Disable_Highlight();
 
-            if (selected_hex.hex_type == Hex.HexType.Default)
-            {
-                Replace_Hex(result);
-            }
+
             
 
             Debug.Log(neighbours.Count);
-            Debug.Log($"neighbours for {selected_hex.hex_coords} are:");
+            //Debug.Log($"neighbours for {selected_hex.hex_coords} are:");
             foreach (Vector3Int neighbours_pos in neighbours)
             {
                 Debug.Log(neighbours_pos);
@@ -98,6 +122,7 @@ public class SelectionManager : MonoBehaviour
             child.GetComponent<MeshRenderer>().material = mat;
             // Debug.Log("Child Name: " + child.GetComponent<MeshFilter>().mesh);
             result.GetComponent<Hex>().hex_type = Hex.HexType.Forest;
+            forest_hex.Add(result);
         }
 
         if (GameManager.cur_turn % 2 == 0)
@@ -106,6 +131,7 @@ public class SelectionManager : MonoBehaviour
             child.GetComponent<MeshRenderer>().material = mat;
             // Debug.Log("Child Name: " + child.GetComponent<MeshFilter>().mesh);
             result.GetComponent<Hex>().hex_type = Hex.HexType.Water;
+            water_hex.Add(result);
         }
     }
 }
