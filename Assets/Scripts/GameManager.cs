@@ -18,14 +18,22 @@ public class GameManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        //Game_Over();
+        Game_Over();
     }
 
     void Game_Over()
     {
         if (is_over)
         {
-            Debug.Log("Game Over");
+            if (cur_turn % 2 == 0)
+            {
+                Debug.Log("forest lose");
+            }
+            else
+            {
+                Debug.Log("water lose");
+            }
+            
         }
     }
 }
