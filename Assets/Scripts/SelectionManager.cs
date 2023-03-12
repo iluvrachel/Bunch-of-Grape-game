@@ -111,6 +111,11 @@ public class SelectionManager : MonoBehaviour
             }
             selected_hex.Disable_Highlight();
 
+            // 这里判断游戏是否结束
+            if (can_select.Count == 0 && GameManager.cur_turn > 2)
+            {
+                GameManager.is_over = true;
+            }
 
             
 
