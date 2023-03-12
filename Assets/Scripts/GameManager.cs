@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    public static int cur_turn = 1;
+    public static int cur_turn = 0;
 
 
 

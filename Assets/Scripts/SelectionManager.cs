@@ -15,6 +15,7 @@ public class SelectionManager : MonoBehaviour
     List<Vector3Int>  neighbours = new List<Vector3Int>();
     List<GameObject> forest_hex = new List<GameObject>();
     List<GameObject> water_hex = new List<GameObject>();
+    List<Hex> can_select = new List<Hex>();
 
     private void Awake()
     {
@@ -31,10 +32,10 @@ public class SelectionManager : MonoBehaviour
         {
             Hex selected_hex = result.GetComponent<Hex>();
 
-            if (selected_hex.hex_type == Hex.HexType.Default)
-            {
-                GameManager.cur_turn++;
-            }
+            // if (selected_hex.hex_type == Hex.HexType.Default)
+            // {
+            //     GameManager.cur_turn++;
+            // }
             
             selected_hex.Disable_Highlight();
             foreach (Vector3Int neightbour in neighbours)
@@ -42,14 +43,34 @@ public class SelectionManager : MonoBehaviour
                 hex_grid.Get_Tile_At(neightbour).Disable_Highlight();
             }
 
+            // 这里判断是否为可选位置
+            Debug.Log(GameManager.cur_turn);
             if (selected_hex.hex_type == Hex.HexType.Default)
             {
-                Replace_Hex(result);
+                if (can_select.Contains(selected_hex))
+                {
+                    Replace_Hex(result);
+                    GameManager.cur_turn++;
+                }
+                else
+                {
+                    if (GameManager.cur_turn % 2 == 0 && forest_hex.Count == 0)
+                    {
+                        Replace_Hex(result);
+                        GameManager.cur_turn++;
+                    }
+                    else if (GameManager.cur_turn % 2 == 1 && water_hex.Count == 0)
+                    {
+                        Replace_Hex(result);
+                        GameManager.cur_turn++;
+                    }
+                }
+                
             }
             // 需要在这里把所有同类hex都做一次bfs
             List<Vector3Int> all_cords = new List<Vector3Int>(); 
 
-            if (GameManager.cur_turn % 2 == 1)
+            if (GameManager.cur_turn % 2 == 0)
             {
                 foreach (GameObject same_type_hex in forest_hex)
                 {
@@ -74,7 +95,9 @@ public class SelectionManager : MonoBehaviour
                 
                 neighbours.AddRange(temp);
             }
-            
+
+            can_select = new List<Hex>();
+
             // 在这里判断一下hex类型，排除一些不要闪烁材质就可以
             foreach (Vector3Int neightbour in neighbours)
             {
@@ -82,6 +105,7 @@ public class SelectionManager : MonoBehaviour
                 if (cur_hex.hex_type == Hex.HexType.Default)
                 {
                     cur_hex.Enable_Highlight();
+                    can_select.Add(cur_hex);
                 }
                 
             }
@@ -90,12 +114,12 @@ public class SelectionManager : MonoBehaviour
 
             
 
-            Debug.Log(neighbours.Count);
-            //Debug.Log($"neighbours for {selected_hex.hex_coords} are:");
-            foreach (Vector3Int neighbours_pos in neighbours)
-            {
-                Debug.Log(neighbours_pos);
-            }
+            // Debug.Log(neighbours.Count);
+            // Debug.Log($"neighbours for {selected_hex.hex_coords} are:");
+            // foreach (Vector3Int neighbours_pos in neighbours)
+            // {
+            //     Debug.Log(neighbours_pos);
+            // }
         } 
     }
 
@@ -116,7 +140,7 @@ public class SelectionManager : MonoBehaviour
     {
         Transform child = result.transform.GetChild(0).GetChild(0);
         
-        if (GameManager.cur_turn % 2 == 1)
+        if (GameManager.cur_turn % 2 == 0)
         {
             Material mat = forest_tile;
             child.GetComponent<MeshRenderer>().material = mat;
@@ -125,7 +149,7 @@ public class SelectionManager : MonoBehaviour
             forest_hex.Add(result);
         }
 
-        if (GameManager.cur_turn % 2 == 0)
+        if (GameManager.cur_turn % 2 == 1)
         {
             Material mat = water_tile;
             child.GetComponent<MeshRenderer>().material = mat;
