@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using TMPro;
 
 
+
 public class CanvasManager : MonoBehaviour
 {
     public static string turn_info = "P1";
@@ -34,4 +35,6 @@ public class CanvasManager : MonoBehaviour
         }
         turn_info_ui.text = turn_info;
     }
+
+
 }
