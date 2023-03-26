@@ -6,13 +6,12 @@ public class GameManager : MonoBehaviour
 {
     public static int cur_turn = 0;
     public static bool is_over = false;
-
-
-
+    
     // Start is called before the first frame update
     void Start()
     {
         is_over = false;
+        
     }
 
     // Update is called once per frame
@@ -27,11 +26,11 @@ public class GameManager : MonoBehaviour
         {
             if (cur_turn % 2 == 0)
             {
-                Debug.Log("forest lose");
+                CanvasManager.turn_info = "water win";
             }
             else
             {
-                Debug.Log("water lose");
+                CanvasManager.turn_info = "forest win";
             }
             
         }
